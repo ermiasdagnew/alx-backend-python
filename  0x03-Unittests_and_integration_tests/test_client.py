@@ -2,7 +2,7 @@
 """Test client module"""
 
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from parameterized import parameterized
 from client import GithubOrgClient
 from fixtures import org_payload, repos_payload
@@ -18,10 +18,11 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch("client.get_json")
     def test_org(self, org_name, mock_get_json):
         """Test that GithubOrgClient.org returns the correct value"""
-        mock_get_json.return_value = {"login": org_name}
+        expected_payload = {"login": org_name}
+        mock_get_json.return_value = expected_payload
 
         client = GithubOrgClient(org_name)
-        self.assertEqual(client.org, {"login": org_name})
+        self.assertEqual(client.org, expected_payload)
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org_name}"
         )
@@ -49,9 +50,7 @@ class TestGithubOrgClient(unittest.TestCase):
             {"name": "repo2", "license": {"key": "bsd-3-clause"}},
             {"name": "repo3"},
         ]
-        # No license filter
         self.assertEqual(client.public_repos(), ["repo1", "repo2", "repo3"])
-        # License filter
         self.assertEqual(client.public_repos("apache-2.0"), ["repo1"])
         self.assertEqual(client.public_repos("bsd-3-clause"), ["repo2"])
 
@@ -60,7 +59,6 @@ class TestGithubOrgClient(unittest.TestCase):
         repo = {"license": {"key": "apache-2.0"}}
         self.assertTrue(GithubOrgClient.has_license(repo, "apache-2.0"))
         self.assertFalse(GithubOrgClient.has_license(repo, "bsd-3-clause"))
-        # Repo without license key
         self.assertFalse(GithubOrgClient.has_license({}, "apache-2.0"))
 
 
@@ -80,10 +78,12 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             client.public_repos(),
             [repo["name"] for repo in repos_payload]
         )
+
         # License filtering works
         license_key = repos_payload[0]["license"]["key"]
         self.assertEqual(client.public_repos(license_key), [repos_payload[0]["name"]])
-        # get_json called twice: org + repos
+
+        # Ensure get_json was called exactly twice (org + repos)
         self.assertEqual(mock_get_json.call_count, 2)
 
 
