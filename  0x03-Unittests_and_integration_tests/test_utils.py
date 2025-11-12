@@ -2,34 +2,39 @@
 """Test utils module"""
 
 import unittest
-from unittest.mock import patch, Mock
-from parameterized import parameterized
-from utils import get_json
+from unittest.mock import patch
+from utils import memoize
 
 
-class TestGetJson(unittest.TestCase):
-    """Test get_json function"""
+class TestMemoize(unittest.TestCase):
+    """Test memoize decorator"""
 
-    @parameterized.expand([
-        ("example", "http://example.com", {"payload": True}),
-        ("holberton", "http://holberton.io", {"payload": False}),
-    ])
-    @patch("utils.requests.get")
-    def test_get_json(self, name, test_url, test_payload, mock_get):
-        """Test that get_json calls requests.get and returns the JSON"""
-        # Configure the mock to return a response with our test_payload
-        mock_get.return_value = Mock()
-        mock_get.return_value.json.return_value = test_payload
+    def test_memoize(self):
+        """Test that memoize caches result and calls the method only once"""
 
-        # Call the function
-        result = get_json(test_url)
+        class TestClass:
+            """A class with a method to be memoized"""
 
-        # Check that requests.get was called exactly once with the test_url
-        mock_get.assert_called_once_with(test_url)
+            def a_method(self):
+                """Method to return a fixed value"""
+                return 42
 
-        # Check that get_json returns the expected payload
-        self.assertEqual(result, test_payload)
+            @memoize
+            def a_property(self):
+                """Memoized property"""
+                return self.a_method()
 
+        test_obj = TestClass()
 
-if __name__ == "__main__":
-    unittest.main()
+        # Patch a_method to track calls
+        with patch.object(test_obj, "a_method", wraps=test_obj.a_method) as mock_method:
+            # First access calls a_method
+            result1 = test_obj.a_property
+            # Second access returns cached value
+            result2 = test_obj.a_property
+
+            # Assert the results are correct
+            self.assertEqual(result1, 42)
+            self.assertEqual(result2, 42)
+            # a_method should have been called only once
+            mock_method.assert_called_once()
