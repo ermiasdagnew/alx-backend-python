@@ -32,7 +32,6 @@ class TestGithubOrgClient(unittest.TestCase):
         payload = {"repos_url": "http://fake.url"}
         client = GithubOrgClient("test")
 
-        # Correct way to patch a property (Task 5)
         with patch.object(GithubOrgClient, "org", new_callable=property) as mock_org:
             mock_org.return_value = payload
             self.assertEqual(client._public_repos_url, "http://fake.url")
@@ -71,7 +70,9 @@ class TestGithubOrgClient(unittest.TestCase):
     ])
     def test_has_license(self, repo, license_key, expected):
         """Test GithubOrgClient.has_license with parameterized inputs"""
-        self.assertEqual(GithubOrgClient.has_license(repo, license_key), expected)
+        # Call static method on the class (important for ALX)
+        result = GithubOrgClient.has_license(repo, license_key)
+        self.assertEqual(result, expected)
 
 
 class TestIntegrationGithubOrgClient(unittest.TestCase):
