@@ -2,7 +2,7 @@
 """Test client module"""
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from parameterized import parameterized
 from client import GithubOrgClient
 from fixtures import org_payload, repos_payload
@@ -17,7 +17,7 @@ class TestGithubOrgClient(unittest.TestCase):
     ])
     @patch("client.get_json")
     def test_org(self, org_name, mock_get_json):
-        """Test that GithubOrgClient.org returns the correct value"""
+        """Test GithubOrgClient.org returns correct value"""
         expected_payload = {"login": org_name}
         mock_get_json.return_value = expected_payload
 
@@ -28,16 +28,21 @@ class TestGithubOrgClient(unittest.TestCase):
         )
 
     def test_public_repos_url(self):
-        """Test _public_repos_url property"""
+        """Test _public_repos_url property with mocked org"""
+        payload = {"repos_url": "http://fake.url"}
         client = GithubOrgClient("test")
-        client.org = {"repos_url": "http://fake.url"}
-        self.assertEqual(client._public_repos_url, "http://fake.url")
+
+        # Patch the org property using a context manager
+        with patch.object(GithubOrgClient, "org", new_callable=property) as mock_org:
+            mock_org.return_value = payload
+            self.assertEqual(client._public_repos_url, "http://fake.url")
 
     @patch("client.get_json")
     def test_repos_payload(self, mock_get_json):
         """Test repos_payload property"""
         mock_get_json.return_value = [{"name": "repo1"}, {"name": "repo2"}]
         client = GithubOrgClient("test")
+        # Manually set _public_repos_url so repos_payload doesn't fail
         client._public_repos_url = "http://fake.url"
         self.assertEqual(client.repos_payload, [{"name": "repo1"}, {"name": "repo2"}])
         mock_get_json.assert_called_once_with("http://fake.url")
@@ -50,7 +55,9 @@ class TestGithubOrgClient(unittest.TestCase):
             {"name": "repo2", "license": {"key": "bsd-3-clause"}},
             {"name": "repo3"},
         ]
+        # No license filter
         self.assertEqual(client.public_repos(), ["repo1", "repo2", "repo3"])
+        # License filter
         self.assertEqual(client.public_repos("apache-2.0"), ["repo1"])
         self.assertEqual(client.public_repos("bsd-3-clause"), ["repo2"])
 
@@ -59,6 +66,7 @@ class TestGithubOrgClient(unittest.TestCase):
         repo = {"license": {"key": "apache-2.0"}}
         self.assertTrue(GithubOrgClient.has_license(repo, "apache-2.0"))
         self.assertFalse(GithubOrgClient.has_license(repo, "bsd-3-clause"))
+        # Repo without license
         self.assertFalse(GithubOrgClient.has_license({}, "apache-2.0"))
 
 
@@ -68,7 +76,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     @patch("client.get_json")
     def test_integration_public_repos(self, mock_get_json):
         """Test public_repos end-to-end using fixtures"""
-        # First call returns org_payload, second call returns repos_payload
+        # First call returns org_payload, second returns repos_payload
         mock_get_json.side_effect = [org_payload, repos_payload]
 
         client = GithubOrgClient("google")
@@ -79,11 +87,11 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             [repo["name"] for repo in repos_payload]
         )
 
-        # License filtering works
+        # Test license filtering
         license_key = repos_payload[0]["license"]["key"]
         self.assertEqual(client.public_repos(license_key), [repos_payload[0]["name"]])
 
-        # Ensure get_json was called exactly twice (org + repos)
+        # get_json should be called exactly twice
         self.assertEqual(mock_get_json.call_count, 2)
 
 
