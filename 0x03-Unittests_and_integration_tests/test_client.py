@@ -2,7 +2,7 @@
 """Test client module"""
 
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from parameterized import parameterized
 from client import GithubOrgClient
 from fixtures import org_payload, repos_payload
@@ -42,9 +42,10 @@ class TestGithubOrgClient(unittest.TestCase):
         """Test repos_payload property"""
         mock_get_json.return_value = [{"name": "repo1"}, {"name": "repo2"}]
         client = GithubOrgClient("test")
-        # Manually set _public_repos_url so repos_payload doesn't fail
         client._public_repos_url = "http://fake.url"
-        self.assertEqual(client.repos_payload, [{"name": "repo1"}, {"name": "repo2"}])
+        self.assertEqual(
+            client.repos_payload, [{"name": "repo1"}, {"name": "repo2"}]
+        )
         mock_get_json.assert_called_once_with("http://fake.url")
 
     def test_public_repos(self):
@@ -53,10 +54,13 @@ class TestGithubOrgClient(unittest.TestCase):
         client.repos_payload = [
             {"name": "repo1", "license": {"key": "apache-2.0"}},
             {"name": "repo2", "license": {"key": "bsd-3-clause"}},
-            {"name": "repo3"},
+            {"name": "repo3"},  # No license
         ]
         # No license filter
-        self.assertEqual(client.public_repos(), ["repo1", "repo2", "repo3"])
+        self.assertEqual(
+            client.public_repos(),
+            ["repo1", "repo2", "repo3"]
+        )
         # License filter
         self.assertEqual(client.public_repos("apache-2.0"), ["repo1"])
         self.assertEqual(client.public_repos("bsd-3-clause"), ["repo2"])
@@ -66,7 +70,6 @@ class TestGithubOrgClient(unittest.TestCase):
         repo = {"license": {"key": "apache-2.0"}}
         self.assertTrue(GithubOrgClient.has_license(repo, "apache-2.0"))
         self.assertFalse(GithubOrgClient.has_license(repo, "bsd-3-clause"))
-        # Repo without license
         self.assertFalse(GithubOrgClient.has_license({}, "apache-2.0"))
 
 
@@ -89,7 +92,10 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
         # Test license filtering
         license_key = repos_payload[0]["license"]["key"]
-        self.assertEqual(client.public_repos(license_key), [repos_payload[0]["name"]])
+        self.assertEqual(
+            client.public_repos(license_key),
+            [repos_payload[0]["name"]]
+        )
 
         # get_json should be called exactly twice
         self.assertEqual(mock_get_json.call_count, 2)
