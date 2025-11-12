@@ -32,7 +32,7 @@ class TestGithubOrgClient(unittest.TestCase):
         payload = {"repos_url": "http://fake.url"}
         client = GithubOrgClient("test")
 
-        # Patch the org property using a context manager
+        # Correct way to patch a property (Task 5)
         with patch.object(GithubOrgClient, "org", new_callable=property) as mock_org:
             mock_org.return_value = payload
             self.assertEqual(client._public_repos_url, "http://fake.url")
@@ -65,12 +65,13 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(client.public_repos("apache-2.0"), ["repo1"])
         self.assertEqual(client.public_repos("bsd-3-clause"), ["repo2"])
 
-    def test_has_license(self):
-        """Test has_license static method"""
-        repo = {"license": {"key": "apache-2.0"}}
-        self.assertTrue(GithubOrgClient.has_license(repo, "apache-2.0"))
-        self.assertFalse(GithubOrgClient.has_license(repo, "bsd-3-clause"))
-        self.assertFalse(GithubOrgClient.has_license({}, "apache-2.0"))
+    @parameterized.expand([
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False),
+    ])
+    def test_has_license(self, repo, license_key, expected):
+        """Test GithubOrgClient.has_license with parameterized inputs"""
+        self.assertEqual(GithubOrgClient.has_license(repo, license_key), expected)
 
 
 class TestIntegrationGithubOrgClient(unittest.TestCase):
