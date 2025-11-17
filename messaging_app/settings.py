@@ -67,20 +67,26 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
 
+# ---------- REST Framework Configuration ----------
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
+    # Global default permissions (Task 1)
+    'DEFAULT_PERMISSION_CLASSES': [
         'chats.permissions.IsParticipantOfConversation',
-    ),
+    ],
+    # JWT authentication (Task 0)
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    # Pagination defaults (Task 2)
     'DEFAULT_PAGINATION_CLASS': 'chats.pagination.MessagePagination',
     'PAGE_SIZE': 20,
-    'DEFAULT_FILTER_BACKENDS': (
+    # Filtering defaults (Task 2)
+    'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
-    ),
+    ],
 }
 
+# ---------- Simple JWT Settings (Task 0) ----------
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
