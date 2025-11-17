@@ -1,28 +1,31 @@
-from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Message
-from .serializers import MessageSerializer
+from django.shortcuts import get_object_or_404
+from .models import Conversation, Message
+from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsParticipantOfConversation
-from .pagination import MessagePagination
-from .filters import MessageFilter
+
+class ConversationViewSet(viewsets.ModelViewSet):
+    queryset = Conversation.objects.all()
+    serializer_class = ConversationSerializer
+    permission_classes = [IsParticipantOfConversation, IsAuthenticated]
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    permission_classes = [IsParticipantOfConversation]
-    pagination_class = MessagePagination
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = MessageFilter
+    permission_classes = [IsParticipantOfConversation, IsAuthenticated]
 
     def get_queryset(self):
-        return Message.objects.filter(conversation__participants=self.request.user)
+        conversation_id = self.request.query_params.get('conversation_id')
+        if conversation_id:
+            return Message.objects.filter(conversation_id=conversation_id)
+        return Message.objects.all()
 
-    # Override list() to ensure paginated response contains page.paginator.count
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)  # <-- contains page.paginator.count
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conversation = serializer.validated_data['conversation']
+        if request.user not in conversation.participants.all():
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
