@@ -1,3 +1,15 @@
+# config/settings.py
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'apps.chats',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -6,8 +18,21 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Custom middleware
     'apps.chats.middleware.RequestLoggingMiddleware',
-    'apps.chats.middleware.RestrictAccessByTimeMiddleware',
-    'apps.chats.middleware.OffensiveLanguageMiddleware',
-    'apps.chats.middleware.RolePermissionMiddleware',
 ]
+
+ROOT_URLCONF = 'config.urls'
+
+SECRET_KEY = 'your-secret-key'
+DEBUG = True
+ALLOWED_HOSTS = []
+
+# Basic database configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
+    }
+}
