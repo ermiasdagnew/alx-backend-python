@@ -10,7 +10,7 @@ class RequestLoggingMiddleware:
         user = getattr(request, 'user', 'Anonymous')
         log_line = f"{datetime.now()} - User: {user} - Path: {request.path}\n"
 
-        # Append log to requests.log (create if not exists)
+        # Append log to requests.log
         with open('apps/chats/requests.log', 'a') as f:
             f.write(log_line)
 
