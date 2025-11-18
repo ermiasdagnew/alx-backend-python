@@ -24,12 +24,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
-
 SECRET_KEY = 'your-secret-key'
 DEBUG = True
 ALLOWED_HOSTS = []
 
-# Basic database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
