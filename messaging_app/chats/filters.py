@@ -2,11 +2,19 @@ import django_filters
 from .models import Message
 
 class MessageFilter(django_filters.FilterSet):
-    sender = django_filters.CharFilter(field_name='sender__username', lookup_expr='icontains')
-    receiver = django_filters.CharFilter(field_name='conversation__participants__username', lookup_expr='icontains')
-    start_date = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
-    end_date = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
-
     class Meta:
         model = Message
-        fields = ['sender', 'receiver', 'start_date', 'end_date']
+        fields = {
+            'sender': ['exact'],
+            'created_at': ['gte', 'lte'],
+        }
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import MessageFilter
+from .pagination import MessagePagination
+
+class MessageListView(generics.ListAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    pagination_class = MessagePagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
