@@ -82,3 +82,24 @@ class OffensiveLanguageMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+# chats/middleware.py
+from django.http import HttpResponseForbidden
+
+class RolepermissionMiddleware:
+    """
+    Middleware to restrict access to certain actions based on user role.
+    Only 'admin' and 'moderator' users are allowed.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, 'user', None)
+
+        # If user is not authenticated or role is not allowed, return 403
+        if not user or not getattr(user, 'role', None) in ['admin', 'moderator']:
+            return HttpResponseForbidden("You do not have permission to access this resource.")
+
+        response = self.get_response(request)
+        return response
