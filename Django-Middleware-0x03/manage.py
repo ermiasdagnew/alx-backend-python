@@ -1,1 +1,1 @@
-# manage.py placeholder
+# Placeholder for manage.py
