@@ -1,15 +1,21 @@
 import os
 from pathlib import Path
 
-# BASE_DIR
+# ----------------------------------------
+# BASE DIRECTORY
+# ----------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY
-SECRET_KEY = 'django-insecure-replace-this-with-your-own-key'
+# ----------------------------------------
+# SECURITY SETTINGS
+# ----------------------------------------
+SECRET_KEY = 'replace-this-with-your-secret-key'
 DEBUG = True
 ALLOWED_HOSTS = []
 
+# ----------------------------------------
 # INSTALLED APPS
+# ----------------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -18,11 +24,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Your apps
-    'chats',  # assuming this is your app
+    # project apps
+    'chats',
 ]
 
-# MIDDLEWARE
+# ----------------------------------------
+# MIDDLEWARE SETTINGS
+# ----------------------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -32,18 +40,25 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    # Custom middleware (Task 4)
+    # custom middleware
+    'chats.middleware.RequestLoggingMiddleware',
+    'chats.middleware.RestrictAccessByTimeMiddleware',
+    'chats.middleware.OffensiveLanguageMiddleware',
     'chats.middleware.RolepermissionMiddleware',
 ]
 
+# ----------------------------------------
 # ROOT URL
-ROOT_URLCONF = 'project_name.urls'  # replace with your project folder name
+# ----------------------------------------
+ROOT_URLCONF = 'messaging_app.urls'
 
-# TEMPLATES (default minimal setup)
+# ----------------------------------------
+# TEMPLATES
+# ----------------------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -56,10 +71,14 @@ TEMPLATES = [
     },
 ]
 
+# ----------------------------------------
 # WSGI
-WSGI_APPLICATION = 'project_name.wsgi.application'  # replace with your project folder name
+# ----------------------------------------
+WSGI_APPLICATION = 'messaging_app.wsgi.application'
 
-# DATABASE (default SQLite)
+# ----------------------------------------
+# DATABASE
+# ----------------------------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -67,22 +86,32 @@ DATABASES = {
     }
 }
 
+# ----------------------------------------
 # PASSWORD VALIDATION
+# ----------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
 ]
 
-# LANGUAGE & TIMEZONE
+# ----------------------------------------
+# INTERNATIONALIZATION
+# ----------------------------------------
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# ----------------------------------------
 # STATIC FILES
-STATIC_URL = '/static/'
+# ----------------------------------------
+STATIC_URL = 'static/'
 
-# DEFAULT AUTO FIELD
+# ----------------------------------------
+# DEFAULT PK FIELD
+# ----------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
