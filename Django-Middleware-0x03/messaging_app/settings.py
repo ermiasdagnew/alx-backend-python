@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-change-this-key'
+SECRET_KEY = 'django-insecure-change-me'
 DEBUG = True
 ALLOWED_HOSTS = []
 
@@ -21,7 +21,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
 
-    'chats.middleware.RolePermissionMiddleware',  # Task 4 only
+    'chats.middleware.RequestLoggingMiddleware',  # Task 1 only
 
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
