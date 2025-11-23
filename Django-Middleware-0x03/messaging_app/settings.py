@@ -60,7 +60,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Django-Middleware-0x03.wsgi.application'
 ASGI_APPLICATION = 'Django-Middleware-0x03.asgi.application'
 
-# Database (sqlite3 example)
+# Database (example using sqlite3)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -70,7 +70,9 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
 ]
 
 # Internationalization
