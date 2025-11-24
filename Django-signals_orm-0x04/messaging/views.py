@@ -20,19 +20,30 @@ def message_list(request):
 
 
 # -----------------------------------------
-# Delete user account
+# Display only unread messages (Task 4)
+# -----------------------------------------
+@login_required
+def unread_messages(request):
+    """
+    Display unread messages using the custom manager and optimize with .only().
+    """
+    messages_qs = Message.unread.for_user(request.user).only('sender', 'content', 'timestamp')
+    return render(request, 'unread_messages.html', {'messages': messages_qs})
+
+
+# -----------------------------------------
+# Delete user account (Task 2)
 # -----------------------------------------
 @login_required
 def delete_user(request):
-    user = request.user
     if request.method == "POST":
-        user.delete()
+        request.user.delete()
         return redirect('home')
     return HttpResponseForbidden("You can only delete your account via POST request")
 
 
 # -----------------------------------------
-# Edit message with history tracking
+# Edit message with history tracking (Task 2)
 # -----------------------------------------
 @login_required
 def edit_message(request, message_id):
@@ -44,15 +55,18 @@ def edit_message(request, message_id):
     if request.method == "POST":
         new_content = request.POST.get('content', '').strip()
         if new_content and new_content != message_obj.content:
+            # Save previous content to MessageHistory
             MessageHistory.objects.create(
                 message=message_obj,
                 old_content=message_obj.content
             )
+            # Update message
             message_obj.content = new_content
             message_obj.edited = True
             message_obj.edited_at = timezone.now()
             message_obj.edited_by = request.user
             message_obj.save()
+
             django_messages.success(request, "Message updated successfully")
 
         return redirect('message_list')
@@ -61,9 +75,13 @@ def edit_message(request, message_id):
 
 
 # -----------------------------------------
-# Threaded messages sent by the user (fix for sender=request.user check)
+# Recursive function for threaded replies
 # -----------------------------------------
 def get_threaded_replies(message):
+    """
+    Recursively get all replies to a message in a threaded format.
+    Optimized with select_related for sender.
+    """
     replies_list = []
     for reply in message.replies.all().select_related('sender'):
         replies_list.append({
@@ -73,11 +91,14 @@ def get_threaded_replies(message):
     return replies_list
 
 
+# -----------------------------------------
+# Threaded messages sent by the user (Task 3)
+# -----------------------------------------
 @login_required
 def sent_threaded_messages(request):
     """
-    Fetch all messages sent by the logged-in user in a threaded format,
-    optimized with select_related and prefetch_related.
+    Display messages sent by the logged-in user in threaded format.
+    Optimized with select_related and prefetch_related.
     """
     messages_qs = Message.objects.filter(
         sender=request.user,
