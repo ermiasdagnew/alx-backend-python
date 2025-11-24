@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head><title>Messages</title></head>
+<body>
+<h1>Your messages</h1>
+{% if user.is_authenticated %}
+    {% for msg in messages %}
+        <div style="border:1px solid #ccc; padding:8px; margin:8px;">
+            <strong>{{ msg.sender.username }}</strong> → <em>{{ msg.receiver.username }}</em><br/>
+            {{ msg.content }}{% if msg.edited %} <small>(edited)</small>{% endif %}<br/>
+            <small>{{ msg.timestamp }}</small>
+            {% for reply in msg.replies.all %}
+                <div style="margin-left:20px; border-left:1px solid #eee; padding-left:8px;">
+                    <strong>{{ reply.sender.username }}</strong>: {{ reply.content }}
+                </div>
+            {% endfor %}
+        </div>
+    {% empty %}
+        <p>No messages yet.</p>
+    {% endfor %}
+{% else %}
+    <p>Please log in to see your messages.</p>
+{% endif %}
+</body>
+</html>
