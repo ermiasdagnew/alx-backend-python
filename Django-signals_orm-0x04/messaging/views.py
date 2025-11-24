@@ -25,9 +25,10 @@ def message_list(request):
 @login_required
 def unread_messages(request):
     """
-    Display unread messages using the custom manager and optimize with .only().
+    Display unread messages using the custom manager method unread_for_user.
+    Optimized with .only() to fetch only necessary fields.
     """
-    messages_qs = Message.unread.for_user(request.user).only('sender', 'content', 'timestamp')
+    messages_qs = Message.unread.unread_for_user(request.user)
     return render(request, 'unread_messages.html', {'messages': messages_qs})
 
 
