@@ -1,20 +1,19 @@
-# Use Python base image
-FROM python:3.10
+FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements
-COPY requirements.txt .
+# Copy dependencies file
+COPY requirements.txt requirements.txt
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy the entire project
 COPY . .
 
-# Expose Django port
+# Expose Django default port
 EXPOSE 8000
 
-# Command to run server
+# Run the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
