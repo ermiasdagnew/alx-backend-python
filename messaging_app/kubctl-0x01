@@ -1,3 +1,27 @@
 #!/bin/bash
+
+# Task 2: Scale Django app deployment to 3 replicas, verify pods, load test, monitor resources
+
+# 1️⃣ Scale the deployment to 3 replicas
+echo "🔧 Scaling messaging-app deployment to 3 replicas..."
 kubectl scale deployment messaging-app --replicas=3
+
+# 2️⃣ Verify pods
+echo "📦 Verifying pods are running..."
 kubectl get pods
+
+# 3️⃣ Perform load testing using wrk
+if command -v wrk &> /dev/null; then
+    echo "⚡ Running load test on messaging-app..."
+    # Get service URL using minikube
+    SERVICE_IP=$(minikube service messaging-app-service --url)
+    wrk -t2 -c10 -d10s $SERVICE_IP
+else
+    echo "⚠️ wrk not installed. Skipping load test."
+fi
+
+# 4️⃣ Monitor resource usage
+echo "📊 Monitoring pod resource usage..."
+kubectl top pods
+
+echo "✅ Task 2 complete: Deployment scaled and verified."
