@@ -1,24 +1,23 @@
 #!/bin/bash
 
-# Task 0: Start Minikube cluster and verify
+# Task 0: Start Minikube cluster, verify it, and list pods
 
-# 1️⃣ Check if Minikube is installed
+# 1. Check if Minikube is installed
 if ! command -v minikube &> /dev/null; then
-    echo "Minikube is not installed. Please install Minikube first."
+    echo "❌ Minikube is not installed. Please install Minikube first."
     exit 1
 fi
 
-# 2️⃣ Start Minikube cluster
-echo "Starting Minikube cluster..."
+# 2. Start Minikube cluster
+echo "🚀 Starting Minikube cluster..."
 minikube start --driver=docker
 
-# 3️⃣ Verify cluster status
-echo "Checking Kubernetes cluster status..."
+# 3. Verify cluster is running
+echo "🔍 Checking Kubernetes cluster status..."
 kubectl cluster-info
 
-# 4️⃣ List all pods in all namespaces
-echo "Listing all pods in all namespaces..."
+# 4. List all pods in all namespaces
+echo "📦 Listing all pods in all namespaces..."
 kubectl get pods --all-namespaces
 
-echo "✅ Task 0 complete: Minikube is running and cluster verified."
-
+echo "✅ Task 0 complete: Minikube cluster is running and verified."
