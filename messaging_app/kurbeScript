@@ -4,36 +4,46 @@
 # Exit immediately if a command fails
 set -e
 
-# Function to check if minikube is installed
+# Function to check if Minikube is installed
 check_minikube() {
     if ! command -v minikube &> /dev/null; then
-        echo "Minikube is not installed. Please install Minikube first."
+        echo "❌ Minikube is not installed. Please install Minikube first."
         exit 1
+    else
+        echo "✅ Minikube is installed."
     fi
 }
 
 # Function to start the Kubernetes cluster
 start_cluster() {
-    echo "Starting Minikube cluster..."
+    echo "⏳ Starting Minikube cluster..."
     minikube start
 }
 
 # Function to verify cluster info
 verify_cluster() {
-    echo "Verifying Kubernetes cluster..."
+    echo "🔍 Verifying Kubernetes cluster..."
     kubectl cluster-info
 }
 
-# Function to list available pods
+# Function to retrieve available pods
 list_pods() {
-    echo "Retrieving available pods..."
+    echo "📦 Listing all pods in all namespaces..."
     kubectl get pods -A
 }
 
 # Main script execution
 check_minikube
-start_cluster
+
+# Check if cluster is already running
+if ! minikube status &> /dev/null; then
+    start_cluster
+else
+    echo "⚡ Minikube cluster is already running."
+fi
+
 verify_cluster
 list_pods
 
-echo "Kubernetes cluster setup complete ✅"
+echo "✅ Kubernetes setup and verification completed successfully."
+
