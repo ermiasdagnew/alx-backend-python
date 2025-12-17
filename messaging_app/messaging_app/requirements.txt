@@ -1,0 +1,6 @@
+Django>=4.0
+pytest
+pytest-django
+gunicorn
+flake8
+coverage
